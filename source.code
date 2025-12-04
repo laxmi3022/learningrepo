@@ -1,0 +1,33 @@
+#!/bin/bash
+
+echo "=============================="
+echo "   EC2 HEALTH CHECK REPORT"
+echo "=============================="
+
+# Date & Host
+echo "Date        : $(date)"
+echo "Hostname    : $(hostname)"
+echo
+
+echo "------------------------------"
+echo " CPU USAGE "
+echo "------------------------------"
+# Shows CPU usage from top command
+top -bn1 | grep "Cpu(s)" | awk '{print "CPU Usage: " $2 + $4 "%"}'
+echo
+
+echo "------------------------------"
+echo " MEMORY USAGE "
+echo "------------------------------"
+free -m | awk 'NR==2{printf "Memory Used: %sMB / %sMB (%.2f%%)\n", $3,$2,$3*100/$2 }'
+echo
+
+echo "------------------------------"
+echo " DISK USAGE "
+echo "------------------------------"
+df -h | grep -E '^/dev/' | awk '{print $1 " -> Used: " $5 " | Available: " $4}'
+echo
+
+echo "=============================="
+echo "   HEALTH CHECK COMPLETED"
+echo "=============================="
