@@ -1,0 +1,53 @@
+#!/bin/bash
+
+# ============================
+# EC2 Health Check Script
+# ============================
+
+echo "========================"
+echo "EC2 Health Check Report"
+echo "Date: $(date)"
+echo "========================"
+echo ""
+
+# 1. Server Info
+echo "Host: $(hostname)"
+echo "Uptime: $(uptime -p)"
+echo ""
+
+# 2. CPU Usage
+echo "CPU Usage:"
+top -b -n1 | grep "Cpu(s)" | awk '{print "Used: " $2 + $4 "%, Idle: " $8 "%"}'
+echo ""
+
+# 3. Memory Usage
+echo "Memory Usage:"
+free -m | awk 'NR==1{printf "Total: %sMB, Used: %sMB, Free: %sMB\n", $2,$3,$4}'
+echo ""
+
+# 4. Disk Usage
+echo "Disk Usage:"
+df -h | grep -v tmpfs | awk '{print $1 ": " $5 " used"}'
+echo ""
+
+# 5. Check services (example: jenkins, docker, nginx)
+SERVICES=("jenkins" "docker" "nginx")
+for service in "${SERVICES[@]}"; do
+    status=$(systemctl is-active $service)
+    echo "Service $service: $status"
+done
+echo ""
+
+# 6. Check network connectivity (ping Google)
+echo "Network Check (ping google.com):"
+ping -c 3 google.com > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+    echo "Network: OK"
+else
+    echo "Network: FAILED"
+fi
+
+echo ""
+echo "========================"
+echo "End of Report"
+echo "========================"
